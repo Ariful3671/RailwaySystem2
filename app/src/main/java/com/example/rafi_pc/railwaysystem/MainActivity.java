@@ -1,85 +1,130 @@
 package com.example.rafi_pc.railwaysystem;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.RadioButton;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
+import java.util.Calendar;
+
 public class MainActivity extends AppCompatActivity {
 
-    Button rd1,rd2,rd3,rd4,rd5,rd6,rd7;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        rd1= (Button) findViewById(R.id.button);
-        rd2= (Button) findViewById(R.id.button2);
-        rd3= (Button) findViewById(R.id.button3);
-        rd4= (Button) findViewById(R.id.button4);
-        rd5= (Button) findViewById(R.id.button5);
-        rd6= (Button) findViewById(R.id.button6);
-        rd7= (Button) findViewById(R.id.button7);
 
-        rd1.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent i = new Intent(MainActivity.this,DhakaRailway.class);
-                startActivity(i);
-            }
-        });
-
-        rd2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent i = new Intent(MainActivity.this,ChittagongRailway.class);
-                startActivity(i);
-            }
-        });
-
-        rd3.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent i = new Intent(MainActivity.this,RajshahiRailway.class);
-                startActivity(i);
-            }
-        });
-
-        rd4.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent i = new Intent(MainActivity.this,SylhetRailway.class);
-                startActivity(i);
-            }
-        });
-
-        rd5.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent i = new Intent(MainActivity.this,BarisalRailway.class);
-                startActivity(i);
-            }
-        });
-
-        rd6.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent i = new Intent(MainActivity.this,RangpurRailway.class);
-                startActivity(i);
-            }
-        });
-
-        rd7.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent i = new Intent(MainActivity.this,KhulnaRailway.class);
-                startActivity(i);
-            }
-        });
+        //Shared preference
+        final SharedPreferences sharedPreferences=getSharedPreferences("profileinfo", Context.MODE_PRIVATE);
+        final SharedPreferences.Editor editor=sharedPreferences.edit();
 
 
+
+        //Creating firebase instance
+        FirebaseDatabase database=FirebaseDatabase.getInstance();
+        DatabaseReference ref=database.getReference("users").child(sharedPreferences.getString("phone",""));
+
+
+
+        //Getting user information from firebase
+        ref.addListenerForSingleValueEvent(
+                new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        editor.putString("name",dataSnapshot.child("name").getValue().toString());
+                        editor.putString("bday",dataSnapshot.child("bday").getValue().toString());
+                        editor.putString("bmonth",dataSnapshot.child("bmonth").getValue().toString());
+                        editor.putString("byear",dataSnapshot.child("byear").getValue().toString());
+                        editor.putString("gender",dataSnapshot.child("gender").getValue().toString().toLowerCase());
+                        editor.putString("birthday",dataSnapshot.child("bday").getValue().toString()+":"
+                                +dataSnapshot.child("bmonth").getValue().toString()+":"
+                                +dataSnapshot.child("byear").getValue().toString());
+                        editor.commit();
+
+
+
+
+                        int currentYear= Calendar.getInstance().get(Calendar.YEAR);
+                        int currentMonth= Calendar.getInstance().get(Calendar.MONTH)+1;
+                        int currentDay= Calendar.getInstance().get(Calendar.DAY_OF_MONTH);
+                        int bYear=Integer.parseInt(dataSnapshot.child("byear").getValue().toString());
+                        int bMonth=Integer.parseInt(dataSnapshot.child("bmonth").getValue().toString());
+                        int bDay=Integer.parseInt(dataSnapshot.child("bday").getValue().toString());
+
+                        int age=currentYear-bYear;
+                        if(currentMonth-bMonth<0)
+                        {
+                            age--;
+                        }
+                        if(currentMonth-bMonth==0)
+                        {
+                            if(currentDay-bDay<0)
+                            {
+                                age--;
+                            }
+                        }
+                        editor.putString("age",String.valueOf(age));
+                        editor.commit();
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                }
+        );
+    }
+
+
+
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu)
+    {
+        MenuInflater inflater=getMenuInflater();
+        inflater.inflate(R.menu.toolbar,menu);
+        return true;
+
+    }
+
+
+
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        int id = item.getItemId();
+        if (id == R.id.item_profile) {
+            Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
+            startActivity(intent);
+            return true;
+        }
+        if (id == R.id.item_log_out) {
+            SharedPreferences sharedPreferences=getSharedPreferences("profileinfo", Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor=sharedPreferences.edit();
+            editor.putString("login status","off");
+            editor.commit();
+            Intent intent = new Intent(MainActivity.this, LogInActivity.class);
+            startActivity(intent);
+            finish();
+            return true;
+        }
+        return true;
     }
 }

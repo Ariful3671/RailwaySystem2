@@ -2,20 +2,22 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.rafi_pc.railwaysystem">
 
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".FrontActivity">
+        <activity android:name=".LogInActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".MainActivity"/>
+        <activity android:name=".MainActivity" />
         <activity android:name=".DhakaRailway" />
         <activity android:name=".ChittagongRailway" />
         <activity android:name=".SylhetRailway" />
@@ -23,7 +25,8 @@
         <activity android:name=".BarisalRailway" />
         <activity android:name=".RangpurRailway" />
         <activity android:name=".KhulnaRailway" />
-
+        <activity android:name=".SignUpActivity" />
+        <activity android:name=".ProfileActivity"></activity>
     </application>
 
 </manifest>
